@@ -19,9 +19,9 @@ folder_path = "conan"
 if not os.path.exists(folder_path):
     os.makedirs(folder_path)
 
-with open(os.path.join(folder_path, "chapter_links.csv"), "w", newline="", encoding="utf-8") as f:
-    writer = csv.writer(f)
-    writer.writerow(["chapter", "link"])
+# with open(os.path.join(folder_path, "chapter_links.csv"), "w", newline="", encoding="utf-8") as f:
+#     writer = csv.writer(f)
+#     writer.writerow(["chapter", "link"])
 
 def get_chapter_link():
     driver = webdriver.Chrome(service=ChromeService("./chromedriver.exe"), options=chrome_options)
@@ -53,7 +53,6 @@ def get_chapter_link():
         driver.quit()
 
 def get_image(url, chapter_name):
-    chapter_name = "conan-1072"
     folder_path = f"conan/{chapter_name}"
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
@@ -72,4 +71,15 @@ def get_image(url, chapter_name):
 
         print(f"Image {index} saved at {img_path}")
 
-get_chapter_link()
+
+def main():
+    with open(os.path.join(folder_path, "chapter_links.csv"), "r", newline="", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        next(reader)
+        for row in reader:
+            get_image(row[1], row[0])
+
+main()
+
+
+
