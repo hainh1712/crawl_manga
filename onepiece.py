@@ -22,42 +22,7 @@ folder_path = "D:\\Personal\\crawl_manga\\onepiece"
 if not os.path.exists(folder_path):
     os.makedirs(folder_path)
 
-# with open(os.path.join(folder_path, "chapter_links.csv"), "w", newline="", encoding="utf-8") as f:
-#     writer = csv.writer(f)
-#     writer.writerow(["chapter", "link"])
-
-def get_chapter_link():
-    driver = webdriver.Chrome(service=ChromeService("./chromedriver.exe"), options=chrome_options)
-    base_url = f"https://kenhsinhvien.vn/f/conan-reading-room.510/" 
-    driver.get(base_url)
-    time.sleep(2)
-    pagination = driver.find_element(By.CLASS_NAME, "pageNavSimple-el").text
-    match = re.search(r'/ (\d+)', pagination)
-    print(match)
-    if match:
-        max_pages = match.group(1)
-    driver.quit()
-
-    for i in range(1, int(max_pages) + 1):
-        driver = webdriver.Chrome(service=ChromeService("./chromedriver.exe"), options=chrome_options)
-        url = f"https://kenhsinhvien.vn/f/conan-reading-room.510/page-{i}" 
-        driver.get(url)
-        time.sleep(5)
-        list_chap = driver.find_element(By.CLASS_NAME, "structItemContainer-group")
-        chaps = list_chap.find_elements(By.CLASS_NAME, "structItem--thread")
-        for chap in chaps:
-            title = chap.find_element(By.CLASS_NAME, "structItem-title").text
-            if re.search(r'CONAN chap', title):
-                print("=======================================")
-                print(title)
-                with open("conan/chapter_links.csv", "a", newline="", encoding="utf-8") as f:
-                    writer = csv.writer(f)
-                    writer.writerow([title, chap.find_element(By.CLASS_NAME, "structItem-title").find_element(By.TAG_NAME, "a").get_attribute("href")])
-        driver.quit()
 def get_image(url, chapter_name):
-    # folder_path = f"onepiece/{chapter_name}"
-    # if not os.path.exists(folder_path):
-    #     os.makedirs(folder_path)
     driver = webdriver.Chrome(service=ChromeService("./chromedriver.exe"), options=chrome_options)
     driver.get(url)
     time.sleep(2)
@@ -83,15 +48,17 @@ def get_image(url, chapter_name):
 
     driver.quit()
 
-get_image("https://truyenqqvn.com/truyen-tranh/one-piece-128-chap-1103.html", "Onepiece chap 1103")
-# def main():
-#     with open(os.path.join(folder_path, "chapter_links.csv"), "r", newline="", encoding="utf-8") as f:
-#         reader = csv.reader(f)
-#         next(reader)
-#         for row in reader:
-#             get_image(row[1], row[0])
+def main():
+    csv_path = folder_path + f"\\chapter_links_test.csv"
+    with open(csv_path, "r", newline="", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        next(reader)
+        for row in reader:
+            chapter_name, link = row
+            get_image(link, chapter_name)
 
-# main()
+main()
+
 
 
 
