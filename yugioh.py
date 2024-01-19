@@ -28,7 +28,7 @@ from botocore.exceptions import NoCredentialsError
 # Configure Chrome options
 chrome_options = ChromeOptions()
 # Run Chrome in headless mode (no GUI)
-# chrome_options.add_argument("--headless=new")
+chrome_options.add_argument("--headless=new")
 
 user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36'
 chrome_options.add_argument(f'user-agent={user_agent}')
@@ -43,6 +43,20 @@ with open(os.path.join(folder_path, "chapter_links.csv"), "w", newline="", encod
     writer = csv.writer(f)
     writer.writerow(["chapter", "link"])
 
+def modified_chapter_name(chapter_name):
+   title_pattern = r"(YuGi-Oh!)"
+   chapter_pattern = r"Duel (\d+)"
+
+   title_match = re.search(title_pattern, chapter_name)
+   chapter_match = re.search(chapter_pattern, chapter_name)
+
+   if title_match and chapter_match:
+      title = title_match.group(1)  
+      chapter = chapter_match.group(1) 
+      return f"{title} Chap {chapter}"
+   else:
+      return chapter_name
+   
 def get_chapter_link():
     driver = webdriver.Chrome(service=ChromeService("./chromedriver.exe"), options=chrome_options)
     base_url = f"https://blogtruyenvn.com/16751/yugi-oh-full-color-edition/" 
@@ -50,9 +64,14 @@ def get_chapter_link():
     time.sleep(2)
     list_chapter = driver.find_element(By.CLASS_NAME, "list-wrap")
     chapters = list_chapter.find_elements(By.TAG_NAME, "p")
-    for chapter in chapters:
+    last_chapter_href = chapters[1].find_element(By.TAG_NAME, "a").get_attribute("href")
+    last_chapter_name = "YuGi-Oh! Chap 343"
+    with open(os.path.join(folder_path, "chapter_links.csv"), "a", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow([last_chapter_name, last_chapter_href])
+    for chapter in chapters[2:]:
         href = chapter.find_element(By.TAG_NAME, "a").get_attribute("href")
-        chapter_name = chapter.find_element(By.TAG_NAME, "a").text
+        chapter_name = modified_chapter_name(chapter.find_element(By.TAG_NAME, "a").text)
         with open(os.path.join(folder_path, "chapter_links.csv"), "a", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow([chapter_name, href])
